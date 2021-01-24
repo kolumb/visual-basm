@@ -6,7 +6,21 @@ const backgroundColor = "#282923";
 
 resizeHandler();
 
-frame(new Vector( width / 2, height * 7 / 8));
+class Cell {
+    constructor(pos) {
+        this.pos = pos;
+        this.size = new Vector(50, 15);
+    }
+    draw() {
+        const visualPos = this.pos.sub(this.size.scale(0.5));
+        ctx.fillStyle = "blue";
+        ctx.fillRect(visualPos.x, visualPos.y, this.size.x, this.size.y);
+    }
+}
+const cell = new Cell(new Vector( width / 2, height * 7 / 8))
+
+frame();
+
 
 const inputElem = document.querySelector("#InputElem");
 let inputProgram = inputElem.value
@@ -15,15 +29,11 @@ let inputProgram = inputElem.value
     .filter(String)
     .filter(line => !line.startsWith("%"));
 
-function frame(v) {
+
+function frame() {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
-    const pos = v.copy();
-    // const pos = new Vector(width / 2, height - 50);
-    const size = new Vector(50, 15);
-    const visualPos = pos.sub(size.scale(0.5));
-    ctx.fillStyle = "blue";
-    ctx.fillRect(visualPos.x, visualPos.y, size.x, size.y);
+    cell.draw();
 }
 
 function resizeHandler() {
