@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, user-scalable=no"
+    />
+    <meta name="theme-color" content="#282923" />
+
+    <title>Visual basm emulator</title>
+    <style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #282923;
+}
+.wrapper {
+    display: flex;
+    height: 100vh;
+}
+#InputElem, #Canvas {
+    width: 50%;
+    background: #282923;
+}
+#InputElem {
+    box-sizing: border-box;
+    font-size: 150%;
+    border: 5px solid black;
+    color: white;
+}
+#InputElem:focus {
+    font-size: 150%;
+    border: 5px solid grey;
+    color: white;
+}
+
+    </style>
+</head>
+<body>
+    <main class="wrapper">
+        <textarea id="InputElem">
+%include "./examples/natives.hasm"
+
+main:
+    push 1
+    push 2
+    push 3
+    plusi
+    plusi
+    call dump_u64
+    halt
+
+%entry main
+        </textarea>
+        <canvas id="Canvas"></canvas>
+    </main>
+    <script src="visualbasm.js"></script>
+</body>
+</html>
