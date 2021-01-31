@@ -32,11 +32,15 @@ let inputProgram = rawCodeLines
 
 const editorElem = document.querySelector("#EditorElem");
 const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
+const lineElems = []
 rawCodeLines.map(line => {
     const lineElem = document.createElement("div");
     lineElem.innerHTML = line.replace(/ /g, "&nbsp;") || "&nbsp;";
     highlightingOverlayElem.appendChild(lineElem);
+    lineElems.push(lineElem);
 })
+
+lineElems[0].classList.add('current-line');
 
 let currentLineIndex = 0;
 let currentLineCode = "";

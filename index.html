@@ -35,14 +35,13 @@ body {
     width: 100%;
     border: 5px solid black;
     font-size: 150%;
-    font-weight: 300;
     color: grey;
     background: #282923;
 }
     #InputElem:focus {
         font-size: 150%;
         border: 5px solid grey;
-        color: white;
+        color: grey;
     }
 #HighlightingOverlay {
     position: absolute;
@@ -52,9 +51,13 @@ body {
     width: 100%;
     padding: 2px;
     border: 5px solid black;
-    font: 600 13.3333px monospace;
+    font: 400 13.3333px monospace;
     font-size: 150%;
     color: white;
+    pointer-events: none;
+}
+#HighlightingOverlay .current-line {
+    background: hsl(192deg 24% 47% / 32%);
 }
 
     </style>
@@ -62,7 +65,7 @@ body {
 <body>
     <main class="wrapper">
         <div id="EditorElem">
-            <textarea id="InputElem">
+            <textarea id="InputElem" spellcheck="false">
 %include "./examples/natives.hasm"
 
 main:
