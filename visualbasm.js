@@ -25,35 +25,33 @@ frame();
 const inputElem = document.querySelector("#InputElem");
 const rawCodeLines = inputElem.value
     .split("\n");
-let inputProgram = rawCodeLines
-    .map(line => line.trim())
-    .filter(String)
-    .filter(line => !line.startsWith("%"));
 
-const editorElem = document.querySelector("#EditorElem");
 const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
-const lineElems = []
+const lineElems = [];
 rawCodeLines.map(line => {
     const lineElem = document.createElement("div");
     lineElem.innerHTML = line.replace(/ /g, "&nbsp;") || "&nbsp;";
-    highlightingOverlayElem.appendChild(lineElem);
     lineElems.push(lineElem);
+    highlightingOverlayElem.appendChild(lineElem);
 })
 
 let currentLineIndex = -1;
 let currentLineCode = "";
+let instruction = "";
 
 const stepLineElem = document.querySelector("#StepLineElem");
 stepLineElem.addEventListener("click", e => {
     lineElems[currentLineIndex]?.classList.remove("current-line");
     while (currentLineIndex < lineElems.length) {
         currentLineIndex++;
-        if(lineElems[currentLineIndex]?.textContent.length > 1) {
+        const lineText = lineElems[currentLineIndex]?.textContent.trim();
+        if (lineText) {
             lineElems[currentLineIndex].classList.add("current-line");
             break;
         }
     }
-    currentLineCode = lineElems[currentLineIndex];
+    currentLineCode = lineElems[currentLineIndex]?.textContent;
+    instruction = currentLineCode?.trim();
 })
 
 
