@@ -45,6 +45,7 @@ body {
 #InputElem {
     color: grey;
     outline: none;
+    resize: none;
 }
     #InputElem:focus {
         font-size: 150%;
@@ -59,6 +60,12 @@ body {
     left: 0;
     color: white;
     pointer-events: none;
+    overflow-y: auto;
+}
+#HighlightingOverlay pre {
+    margin: 0;
+    white-space: pre-wrap;
+    min-height: 1.149em;
 }
 #HighlightingOverlay .current-line {
     background: hsl(192deg 24% 47% / 32%);

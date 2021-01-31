@@ -1,10 +1,15 @@
 "use strict";
+const inputElem = document.querySelector("#InputElem");
+const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
+const stepLineElem = document.querySelector("#StepLineElem");
+
 const canvas = document.querySelector("#Canvas");
 const ctx = canvas.getContext("2d", {alpha: false});
-let width, height;
+let width = innerWidth / 2
+let height = innerHeight;
+let editorHeight;
 const backgroundColor = "#282923";
 
-resizeHandler();
 
 class Cell {
     constructor(pos, value = 0) {
@@ -24,18 +29,18 @@ const cells = [];
 const cell = new Cell(new Vector( width / 2, height * 7 / 8))
 cells.push(cell);
 
-frame();
+resizeHandler();
 
-
-const inputElem = document.querySelector("#InputElem");
 const rawCodeLines = inputElem.value
     .split("\n");
 
-const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
+inputElem.addEventListener("scroll", e => {
+    highlightingOverlayElem.scrollTop = inputElem.scrollTop;
+})
 const lineElems = [];
 rawCodeLines.map(line => {
-    const lineElem = document.createElement("div");
-    lineElem.innerHTML = line.replace(/ /g, "&nbsp;") || "&nbsp;";
+    const lineElem = document.createElement("pre");
+    lineElem.innerHTML = line;
     lineElems.push(lineElem);
     highlightingOverlayElem.appendChild(lineElem);
 })
@@ -51,12 +56,25 @@ function stepEditor() {
     lineElems[currentLineIndex]?.classList.remove("current-line");
     while (currentLineIndex < lineElems.length) {
         currentLineIndex++;
-        if (lineElems[currentLineIndex]?.textContent.trim()) {
+        instruction = lineElems[currentLineIndex]?.textContent.trim()
+        if (instruction && !instruction.startsWith(";")) {
             break;
         }
     } // side effects: currentLineIndex
     lineElems[currentLineIndex]?.classList.add("current-line");
-    instruction = lineElems[currentLineIndex]?.textContent.trim();
+    if (lineElems[currentLineIndex]?.offsetTop - inputElem.scrollTop < editorHeight / 4) {
+        inputElem.scroll({
+          top: lineElems[currentLineIndex]?.offsetTop - editorHeight / 4, 
+          left: 0,
+          behavior: 'smooth'
+        });
+    } else if (lineElems[currentLineIndex]?.offsetTop - inputElem.scrollTop > 3 * editorHeight / 4) {
+        inputElem.scroll({
+          top: lineElems[currentLineIndex]?.offsetTop - 3 * editorHeight / 4,
+          left: 0,
+          behavior: 'smooth'
+        });
+    }
 }
 function parseInstruction() {
     if (!instruction) {
@@ -106,14 +124,23 @@ function executeInstruction() {
         console.error(`Invalid instruction ${instructionParts[0]} in "${instruction}" on line ${currentLineIndex}.`);
     }
 }
-
-const stepLineElem = document.querySelector("#StepLineElem");
-stepLineElem.addEventListener("click", e => {
+function stepLineHandler (e) {
     stepEditor();
     parseInstruction();
     executeInstruction();
     frame();
-})
+};
+
+stepLineElem.addEventListener("click", stepLineHandler)
+window.addEventListener("keydown", e => {
+    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT") {
+        return;
+    } else {
+        if (e.code === "Space") {
+            stepLineHandler();
+        }
+    }
+});
 
 
 function frame() {
@@ -128,5 +155,7 @@ function resizeHandler() {
     canvas.height = height;
     canvas.width = width;
     ctx.textAlign = "center";
+    editorHeight = inputElem.offsetHeight;
+    frame();
 };
 window.addEventListener("resize", resizeHandler);
