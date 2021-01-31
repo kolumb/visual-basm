@@ -62,9 +62,16 @@ stepLineElem.addEventListener("click", e => {
         console.error(`Invalid instruction "${instruction}" on line ${currentLineIndex}`);
     } else {
         if(instructionParts[0] === "push") {
-            const prevPos = cells[cells.length - 1].pos
-            const newPos = prevPos.add(new Vector(0, -30))
+            const prevCell = cells[cells.length - 1];
+            const newPos = prevCell.pos.add(new Vector(0, -30));
             const value = instructionParts[1];
+            cells.push(new Cell(newPos, value));
+        }
+        if(instructionParts[0] === "plusi") {
+            const prevCell = cells.pop();
+            const prevPrevCell = cells.pop();
+            const newPos = prevPrevCell.pos;
+            const value = parseInt(prevPrevCell.value) + parseInt(prevCell.value);
             cells.push(new Cell(newPos, value));
         }
     }
