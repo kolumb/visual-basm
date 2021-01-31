@@ -47,60 +47,64 @@ rawCodeLines.map(line => {
 
 const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
-let currentLineIndex = -1;
-let instruction = "";
-let instructionParts = [];
-let instructionType;
+let instrLineIndex = -1;
+let instrLine = "";
+let instrParts = [];
+let instrType;
 
 function stepEditor() {
-    lineElems[currentLineIndex]?.classList.remove("current-line");
-    while (currentLineIndex < lineElems.length) {
-        currentLineIndex++;
-        instruction = lineElems[currentLineIndex]?.textContent.trim()
-        if (instruction && !instruction.startsWith(";")) {
+    lineElems[instrLineIndex]?.classList.remove("current-line");
+    while (instrLineIndex < lineElems.length) {
+        instrLineIndex++;
+        instrLine = lineElems[instrLineIndex]?.textContent.trim()
+        if (instrLine && !instrLine.startsWith(";")) {
             break;
         }
-    } // side effects: currentLineIndex
-    lineElems[currentLineIndex]?.classList.add("current-line");
-    if (lineElems[currentLineIndex]?.offsetTop - inputElem.scrollTop < editorHeight / 4) {
+    } // side effects: instrLineIndex
+    lineElems[instrLineIndex]?.classList.add("current-line");
+    if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop < editorHeight / 4) {
         inputElem.scroll({
-          top: lineElems[currentLineIndex]?.offsetTop - editorHeight / 4, 
+          top: lineElems[instrLineIndex]?.offsetTop - editorHeight / 4,
           left: 0,
           behavior: 'smooth'
         });
-    } else if (lineElems[currentLineIndex]?.offsetTop - inputElem.scrollTop > 3 * editorHeight / 4) {
+    } else if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop > 3 * editorHeight / 4) {
         inputElem.scroll({
-          top: lineElems[currentLineIndex]?.offsetTop - 3 * editorHeight / 4,
+          top: lineElems[instrLineIndex]?.offsetTop - 3 * editorHeight / 4,
           left: 0,
           behavior: 'smooth'
         });
     }
 }
 function parseInstruction() {
-    if (!instruction) {
-        if (currentLineIndex !== lineElems.length) {
-            console.error("Instruction was not parsed.");
+    if (!instrLine) {
+        if (instrLineIndex !== lineElems.length) {
+            console.error(`Expected instruction on line ${instrLineIndex}.`);
         } else {
-            console.log("Reached the end of the program.");
+            console.log(`Reached the end of the program on line ${instrLineIndex}.`);
             stepLineElem.disabled = true;
         }
         return;
     }
-    instructionParts = instruction.split(/\s+/);
-    if (instructionParts[0].startsWith("%")) {
-        instructionType = LINE_TYPE.PRE_PROCESSOR;
-    } else if (instructionParts[0].endsWith(":")) {
-        instructionType = LINE_TYPE.LABEL;
+    instrParts = instrLine.split(/\s+/);
+    if (instrParts[0].startsWith("%")) {
+        instrType = LINE_TYPE.PRE_PROCESSOR;
+    } else if (instrParts[0].endsWith(":")) {
+        instrType = LINE_TYPE.LABEL;
     } else {
-        instructionType = LINE_TYPE.INSTRUCTION;
+        instrType = LINE_TYPE.INSTRUCTION;
     }
 }
 function executeInstruction() {
-    switch (instructionParts[0]) {
+    if (instrType !== LINE_TYPE.INSTRUCTION) {
+        console.log(`Skipping "${instrLine}"`);
+        return;
+    }
+    switch (instrParts[0]) {
     case "push": {
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(new Vector(0, -30));
-        const value = instructionParts[1];
+        const value = instrParts[1];
         cells.push(new Cell(newPos, value));
         } break;
     case "plusi": {
@@ -121,7 +125,7 @@ function executeInstruction() {
     case "main:": {
         } break;
     default:
-        console.error(`Invalid instruction ${instructionParts[0]} in "${instruction}" on line ${currentLineIndex}.`);
+        console.error(`Invalid instruction ${instrParts[0]} in "${instrLine}" on line ${instrLineIndex}.`);
     }
 }
 function stepLineHandler (e) {
