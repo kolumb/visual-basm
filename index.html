@@ -20,19 +20,40 @@ body {
     display: flex;
     height: 100vh;
 }
-#InputElem, #Canvas {
+#EditorElem, #Canvas {
     width: 50%;
-    background: #282923;
+}
+
+#EditorElem {
+    position: relative;
+}
+#InputElem, #HighlightingOverlay {
+    height: 100vh;
 }
 #InputElem {
     box-sizing: border-box;
-    font-size: 150%;
+    width: 100%;
     border: 5px solid black;
-    color: white;
-}
-#InputElem:focus {
     font-size: 150%;
-    border: 5px solid grey;
+    font-weight: 300;
+    color: grey;
+    background: #282923;
+}
+    #InputElem:focus {
+        font-size: 150%;
+        border: 5px solid grey;
+        color: white;
+    }
+#HighlightingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 2px;
+    border: 5px solid black;
+    font: 600 13.3333px monospace;
+    font-size: 150%;
     color: white;
 }
 
@@ -40,7 +61,8 @@ body {
 </head>
 <body>
     <main class="wrapper">
-        <textarea id="InputElem">
+        <div id="EditorElem">
+            <textarea id="InputElem">
 %include "./examples/natives.hasm"
 
 main:
@@ -52,8 +74,9 @@ main:
     call dump_u64
     halt
 
-%entry main
-        </textarea>
+%entry main</textarea>
+            <div id="HighlightingOverlay"></div>
+        </div>
         <canvas id="Canvas"></canvas>
     </main>
     <script src="vector.js"></script>

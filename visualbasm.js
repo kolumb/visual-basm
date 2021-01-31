@@ -23,11 +23,23 @@ frame();
 
 
 const inputElem = document.querySelector("#InputElem");
-let inputProgram = inputElem.value
-    .split("\n")
+const rawCodeLines = inputElem.value
+    .split("\n");
+let inputProgram = rawCodeLines
     .map(line => line.trim())
     .filter(String)
     .filter(line => !line.startsWith("%"));
+
+const editorElem = document.querySelector("#EditorElem");
+const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
+rawCodeLines.map(line => {
+    const lineElem = document.createElement("div");
+    lineElem.innerHTML = line.replace(/ /g, "&nbsp;") || "&nbsp;";
+    highlightingOverlayElem.appendChild(lineElem);
+})
+
+let currentLineIndex = 0;
+let currentLineCode = "";
 
 
 function frame() {
