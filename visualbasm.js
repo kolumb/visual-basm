@@ -7,17 +7,22 @@ const backgroundColor = "#282923";
 resizeHandler();
 
 class Cell {
-    constructor(pos) {
+    constructor(pos, value = 0) {
         this.pos = pos;
         this.size = new Vector(50, 15);
+        this.value = value
     }
     draw() {
         const visualPos = this.pos.sub(this.size.scale(0.5));
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = "#27356b";
         ctx.fillRect(visualPos.x, visualPos.y, this.size.x, this.size.y);
+        ctx.fillStyle = "white";
+        ctx.fillText(this.value, this.pos.x, this.pos.y + this.size.y / 4);
     }
 }
+const cells = [];
 const cell = new Cell(new Vector( width / 2, height * 7 / 8))
+cells.push(cell);
 
 frame();
 
@@ -52,13 +57,25 @@ stepLineElem.addEventListener("click", e => {
     }
     currentLineCode = lineElems[currentLineIndex]?.textContent;
     instruction = currentLineCode?.trim();
+    const instructionParts = instruction.split(/\s+/);
+    if (instructionParts.length > 2) {
+        console.error(`Invalid instruction "${instruction}" on line ${currentLineIndex}`);
+    } else {
+        if(instructionParts[0] === "push") {
+            const prevPos = cells[cells.length - 1].pos
+            const newPos = prevPos.add(new Vector(0, -30))
+            const value = instructionParts[1];
+            cells.push(new Cell(newPos, value));
+        }
+    }
+    frame();
 })
 
 
 function frame() {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
-    cell.draw();
+    cells.map(cell => cell.draw());
 }
 
 function resizeHandler() {
@@ -66,5 +83,6 @@ function resizeHandler() {
     height = innerHeight;
     canvas.height = height;
     canvas.width = width;
+    ctx.textAlign = "center";
 };
 window.addEventListener("resize", resizeHandler);
