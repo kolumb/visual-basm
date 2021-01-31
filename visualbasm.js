@@ -57,7 +57,12 @@ stepLineElem.addEventListener("click", e => {
     }
     currentLineCode = lineElems[currentLineIndex]?.textContent;
     instruction = currentLineCode?.trim();
-    const instructionParts = instruction.split(/\s+/);
+    const instructionParts = instruction?.split(/\s+/);
+    if (!instructionParts) {
+        console.log("Reached end of the program");
+        stepLineElem.disabled = true;
+        return;
+    }
     if (instructionParts.length > 2) {
         console.error(`Invalid instruction "${instruction}" on line ${currentLineIndex}`);
     } else {

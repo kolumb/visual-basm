@@ -8,7 +8,7 @@
     />
     <meta name="theme-color" content="#282923" />
 
-    <title>Visual basm emulator</title>
+    <title>Visual basm interpreter</title>
     <meta name="author" content="Danil Kolumbet">
     <style>
 body {
@@ -77,6 +77,11 @@ body {
     }
     #StepLineElem:active {
         text-shadow: 1px 2px 2px black;
+    }
+    #StepLineElem:disabled {
+        cursor: not-allowed;
+        color: grey;
+        background: hsl(236deg 21% 15%);
     }
 
     </style>
