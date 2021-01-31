@@ -40,10 +40,21 @@ rawCodeLines.map(line => {
     lineElems.push(lineElem);
 })
 
-lineElems[0].classList.add('current-line');
-
-let currentLineIndex = 0;
+let currentLineIndex = -1;
 let currentLineCode = "";
+
+const stepLineElem = document.querySelector("#StepLineElem");
+stepLineElem.addEventListener("click", e => {
+    lineElems[currentLineIndex]?.classList.remove("current-line");
+    while (currentLineIndex < lineElems.length) {
+        currentLineIndex++;
+        if(lineElems[currentLineIndex]?.textContent.length > 1) {
+            lineElems[currentLineIndex].classList.add("current-line");
+            break;
+        }
+    }
+    currentLineCode = lineElems[currentLineIndex];
+})
 
 
 function frame() {

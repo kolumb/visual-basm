@@ -20,52 +20,72 @@ body {
     display: flex;
     height: 100vh;
 }
-#EditorElem, #Canvas {
+#EnterpreterElem, #Canvas {
     width: 50%;
+}
+#EnterpreterElem {
+    display: flex;
+    flex-direction: column;
 }
 
 #EditorElem {
     position: relative;
+    flex-grow: 1;
 }
 #InputElem, #HighlightingOverlay {
-    height: 100vh;
-}
-#InputElem {
     box-sizing: border-box;
     width: 100%;
+    height: 100%;
     border: 5px solid black;
+    padding: 2px;
+    font: 400 13.3333px monospace;
     font-size: 150%;
+    background: transparent;
+}
+#InputElem {
     color: grey;
-    background: #282923;
+    outline: none;
 }
     #InputElem:focus {
         font-size: 150%;
-        border: 5px solid grey;
         color: grey;
+    }
+    #InputElem:focus+#HighlightingOverlay {
+        border: 5px solid grey;
     }
 #HighlightingOverlay {
     position: absolute;
     top: 0;
     left: 0;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 2px;
-    border: 5px solid black;
-    font: 400 13.3333px monospace;
-    font-size: 150%;
     color: white;
     pointer-events: none;
 }
 #HighlightingOverlay .current-line {
     background: hsl(192deg 24% 47% / 32%);
 }
+#StepLineElem {
+    height: 40px;
+    cursor: pointer;
+    font-size: 150%;
+    color: #d5d5d5;
+    background: hsl(236deg 10% 25%);
+    outline:none;
+    border-radius: 0;
+}
+    #StepLineElem:hover {
+        background: hsl(236deg 21% 30%);
+    }
+    #StepLineElem:active {
+        text-shadow: 1px 2px 2px black;
+    }
 
     </style>
 </head>
 <body>
     <main class="wrapper">
-        <div id="EditorElem">
-            <textarea id="InputElem" spellcheck="false">
+        <div id="EnterpreterElem">
+            <div id="EditorElem">
+                <textarea id="InputElem" spellcheck="false">
 %include "./examples/natives.hasm"
 
 main:
@@ -78,7 +98,9 @@ main:
     halt
 
 %entry main</textarea>
-            <div id="HighlightingOverlay"></div>
+                <div id="HighlightingOverlay"></div>
+            </div>
+            <button id="StepLineElem">Step a line</button>
         </div>
         <canvas id="Canvas"></canvas>
     </main>
