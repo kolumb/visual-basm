@@ -40,8 +40,12 @@ rawCodeLines.map(line => {
     highlightingOverlayElem.appendChild(lineElem);
 })
 
+const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
+
 let currentLineIndex = -1;
 let instruction = "";
+let instructionParts = [];
+let instructionType;
 
 function stepEditor() {
     lineElems[currentLineIndex]?.classList.remove("current-line");
@@ -54,8 +58,7 @@ function stepEditor() {
     lineElems[currentLineIndex]?.classList.add("current-line");
     instruction = lineElems[currentLineIndex]?.textContent.trim();
 }
-
-function executeInstruction() {
+function parseInstruction() {
     if (!instruction) {
         if (currentLineIndex !== lineElems.length) {
             console.error("Instruction was not parsed.");
@@ -65,43 +68,49 @@ function executeInstruction() {
         }
         return;
     }
-    const instructionParts = instruction.split(/\s+/);
-    if (instructionParts.length > 2) {
-        console.error(`Invalid instruction "${instruction}" on line ${currentLineIndex}`);
+    instructionParts = instruction.split(/\s+/);
+    if (instructionParts[0].startsWith("%")) {
+        instructionType = LINE_TYPE.PRE_PROCESSOR;
+    } else if (instructionParts[0].endsWith(":")) {
+        instructionType = LINE_TYPE.LABEL;
     } else {
-        switch (instructionParts[0]) {
-        case "push": {
-            const prevCell = cells[cells.length - 1];
-            const newPos = prevCell.pos.add(new Vector(0, -30));
-            const value = instructionParts[1];
-            cells.push(new Cell(newPos, value));
-            } break;
-        case "plusi": {
-            const prevCell = cells.pop();
-            const prevPrevCell = cells.pop();
-            const newPos = prevPrevCell.pos;
-            const value = parseInt(prevPrevCell.value) + parseInt(prevCell.value);
-            cells.push(new Cell(newPos, value));
-            } break;
-        case "call": {
-            } break;
-        case "halt": {
-            } break;
-        case "%include": {
-            } break;
-        case "%entry": {
-            } break;
-        case "main:": {
-            } break;
-        default:
-            console.error(`Instruction "${instructionParts[0]}" on line ${currentLineIndex} is not implemented.`);
-        }
+        instructionType = LINE_TYPE.INSTRUCTION;
+    }
+}
+function executeInstruction() {
+    switch (instructionParts[0]) {
+    case "push": {
+        const prevCell = cells[cells.length - 1];
+        const newPos = prevCell.pos.add(new Vector(0, -30));
+        const value = instructionParts[1];
+        cells.push(new Cell(newPos, value));
+        } break;
+    case "plusi": {
+        const prevCell = cells.pop();
+        const prevPrevCell = cells.pop();
+        const newPos = prevPrevCell.pos;
+        const value = parseInt(prevPrevCell.value) + parseInt(prevCell.value);
+        cells.push(new Cell(newPos, value));
+        } break;
+    case "call": {
+        } break;
+    case "halt": {
+        } break;
+    case "%include": {
+        } break;
+    case "%entry": {
+        } break;
+    case "main:": {
+        } break;
+    default:
+        console.error(`Invalid instruction ${instructionParts[0]} in "${instruction}" on line ${currentLineIndex}.`);
     }
 }
 
 const stepLineElem = document.querySelector("#StepLineElem");
 stepLineElem.addEventListener("click", e => {
     stepEditor();
+    parseInstruction();
     executeInstruction();
     frame();
 })
