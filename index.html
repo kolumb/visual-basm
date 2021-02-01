@@ -33,6 +33,24 @@ body {
     position: relative;
     flex-grow: 1;
 }
+#TabsElem {
+    display: flex;
+    justify-content: space-evenly;
+    color: #999;
+}
+.tab {
+    text-align: center;
+    padding: 0 1em;
+    background: #333;
+    cursor: pointer;
+}
+    .tab.selected {
+        color: white;
+        background: #000;
+    }
+    .tab label {
+        cursor: pointer;
+    }
 #InputElem, #HighlightingOverlay {
     box-sizing: border-box;
     width: 100%;
@@ -48,6 +66,8 @@ body {
     outline: none;
     resize: none;
     line-height: 24px;
+    scrollbar-color: dark;
+    cursor: auto;
 }
     #InputElem:focus {
         font-size: 150%;
@@ -56,6 +76,19 @@ body {
     #InputElem::selection {
         color: white;
         background: rgb(8, 101, 211);
+    }
+    #InputElem::-webkit-scrollbar {
+        width: auto;
+    }
+    #InputElem::-webkit-scrollbar-track {
+        cursor: pointer;
+        background: #4d4d4d;
+    }
+    #InputElem::-webkit-scrollbar-thumb {
+        background: #222;
+    }
+    #InputElem::-webkit-scrollbar-button {
+        background: #404040;
     }
     #InputElem:focus+#HighlightingOverlay {
         border: 5px solid grey;
@@ -67,7 +100,20 @@ body {
     color: white;
     pointer-events: none;
     overflow-y: auto;
+    scrollbar-color: dark;
 }
+    #HighlightingOverlay::-webkit-scrollbar {
+        width: auto;
+    }
+    #HighlightingOverlay::-webkit-scrollbar-track {
+        background: #4d4d4d;
+    }
+    #HighlightingOverlay::-webkit-scrollbar-thumb {
+        background: #222;
+    }
+    #HighlightingOverlay::-webkit-scrollbar-button {
+        background: #404040;
+    }
 #HighlightingOverlay pre {
     margin: 0;
     white-space: pre-wrap;
@@ -111,6 +157,20 @@ body {
 <body>
     <main class="wrapper">
         <div id="InterpreterElem">
+            <div id="TabsElem">
+                <div class="tab selected">
+                    <label for="Entry point:">Entry point:</label>
+                    <select id="EntryPointOptionElem">
+                        <option value="main">main:</option>
+                    </select>
+                </div>
+                <div class="tab">
+                    <label for="Entry point:">Included sources:</label>
+                    <select id="IncludeOptionElem">
+                        <option value="natives.hasm">natives.hasm</option>
+                    </select>
+                </div>
+            </div>
             <div id="EditorElem">
                 <textarea id="InputElem" spellcheck="false">
 %native write       7

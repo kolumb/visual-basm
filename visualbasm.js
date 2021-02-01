@@ -1,4 +1,5 @@
 "use strict";
+const tabsElem = document.querySelector("#TabsElem");
 const inputElem = document.querySelector("#InputElem");
 const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
 const stepLineElem = document.querySelector("#StepLineElem");
@@ -144,6 +145,18 @@ function resizeHandler() {
     frame();
 };
 window.addEventListener("resize", resizeHandler);
+
+tabsElem.addEventListener("click", e => {
+    if (e.target.nodeName !== "SELECT") {
+        Array.prototype.slice.call(tabsElem.children).map(tab => {
+            if(e.target === tab || e.target.parentNode === tab) {
+                tab.classList.add('selected')
+            } else {
+                tab.classList.remove('selected')
+            }
+        })
+    }
+})
 
 inputElem.addEventListener("input", e => {
     const newLines = inputElem.value.split("\n")
