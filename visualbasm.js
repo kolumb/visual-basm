@@ -31,26 +31,31 @@ cells.push(cell);
 
 resizeHandler();
 
-const rawCodeLines = inputElem.value
-    .split("\n");
-
-inputElem.addEventListener("scroll", e => {
-    highlightingOverlayElem.scrollTop = inputElem.scrollTop;
-})
+let rawCodeLines;
 const lineElems = [];
-rawCodeLines.map(line => {
-    const lineElem = document.createElement("pre");
-    lineElem.innerHTML = line;
-    lineElems.push(lineElem);
-    highlightingOverlayElem.appendChild(lineElem);
-})
-
-const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 let instrLineIndex = -1;
 let instrLine = "";
 let instrParts = [];
 let instrType;
+const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
+
+parseInput();
+
+function addLineToEditor(line) {
+    const lineElem = document.createElement("pre");
+    lineElem.innerHTML = line;
+    lineElems.push(lineElem);
+    highlightingOverlayElem.appendChild(lineElem);
+}
+
+function parseInput() {
+    rawCodeLines = inputElem.value.split("\n");
+
+    lineElems.length = 0;
+    highlightingOverlayElem.innerHTML = "";
+    rawCodeLines.map(addLineToEditor);
+}
 
 function stepEditor() {
     lineElems[instrLineIndex]?.classList.remove("current-line");
@@ -118,34 +123,10 @@ function executeInstruction() {
         } break;
     case "halt": {
         } break;
-    case "%include": {
-        } break;
-    case "%entry": {
-        } break;
-    case "main:": {
-        } break;
     default:
         console.error(`Invalid instruction ${instrParts[0]} in "${instrLine}" on line ${instrLineIndex}.`);
     }
 }
-function stepLineHandler (e) {
-    stepEditor();
-    parseInstruction();
-    executeInstruction();
-    frame();
-};
-
-stepLineElem.addEventListener("click", stepLineHandler)
-window.addEventListener("keydown", e => {
-    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT") {
-        return;
-    } else {
-        if (e.code === "Space") {
-            stepLineHandler();
-        }
-    }
-});
-
 
 function frame() {
     ctx.fillStyle = backgroundColor;
@@ -163,3 +144,52 @@ function resizeHandler() {
     frame();
 };
 window.addEventListener("resize", resizeHandler);
+
+inputElem.addEventListener("input", e => {
+    const newLines = inputElem.value.split("\n")
+    newLines.map((newLine, i) => {
+        if (newLine !== rawCodeLines[i]) {
+            if (newLine === rawCodeLines[i+1]) {
+                lineElems[i].textContent = newLine;
+            } else if (newLine === rawCodeLines[i-1]) {
+                if (lineElems[i]) {
+                    lineElems[i].textContent = newLine;
+                } else {
+                    addLineToEditor(newLine);
+                }
+            } else {
+                if (lineElems[i]) {
+                    lineElems[i].textContent = newLine;
+                } else {
+                    addLineToEditor(newLine);
+                }
+            }
+        }
+    });
+    for (let i = lineElems.length - 1; lineElems.length > newLines.length; i--) {
+        lineElems.pop().remove();
+    }
+    rawCodeLines = newLines;
+});
+
+inputElem.addEventListener("scroll", e => {
+    highlightingOverlayElem.scrollTop = inputElem.scrollTop;
+});
+
+function stepLineHandler (e) {
+    stepEditor();
+    parseInstruction();
+    executeInstruction();
+    frame();
+};
+
+stepLineElem.addEventListener("click", stepLineHandler)
+window.addEventListener("keydown", e => {
+    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT") {
+        return;
+    } else {
+        if (e.code === "Space") {
+            stepLineHandler();
+        }
+    }
+});

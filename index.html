@@ -10,6 +10,7 @@
 
     <title>Visual basm interpreter</title>
     <meta name="author" content="Danil Kolumbet">
+    <meta name="description" content="Visual interpreter of assembly for birtual machine developed by Tsoding. Examples are copypasted from https://github.com/tsoding/bm/tree/master/examples">
     <style>
 body {
     margin: 0;
@@ -46,10 +47,15 @@ body {
     color: grey;
     outline: none;
     resize: none;
+    line-height: 24px;
 }
     #InputElem:focus {
         font-size: 150%;
         color: grey;
+    }
+    #InputElem::selection {
+        color: white;
+        background: rgb(8, 101, 211);
     }
     #InputElem:focus+#HighlightingOverlay {
         border: 5px solid grey;
@@ -65,7 +71,8 @@ body {
 #HighlightingOverlay pre {
     margin: 0;
     white-space: pre-wrap;
-    min-height: 1.149em;
+    min-height: 24px;
+    line-height: 24px;
 }
 #HighlightingOverlay .current-line {
     background: hsl(192deg 24% 47% / 32%);
@@ -90,6 +97,14 @@ body {
         color: grey;
         background: hsl(236deg 21% 15%);
     }
+#ForkMe {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    color: white;
+    background: #282923;
+    padding: 4px;
+}
 
     </style>
 </head>
@@ -453,6 +468,7 @@ dump_u64:
         </div>
         <canvas id="Canvas"></canvas>
     </main>
+    <a href="https://github.com/tsoding/bm" id="ForkMe">Author of basm language</a>
     <script src="vector.js"></script>
     <script src="visualbasm.js"></script>
 </body>
