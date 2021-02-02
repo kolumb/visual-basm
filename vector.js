@@ -48,6 +48,11 @@ class Vector {
         this.y = y;
         return this;
     }
+    setFrom(v) {
+        this.x = v.x;
+        this.y = v.y;
+        return this;
+    }
     clamp(length) {
         if (this.length() < length) return this;
         const angle = Math.atan2(this.y, this.x);

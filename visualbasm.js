@@ -133,19 +133,63 @@ function executeInstruction() {
     }
     switch (instrParts[0]) {
     case "push": {
+        if (null == instrParts[1]) {
+            console.error(`No value was provided to "push" on line ${instrLineIndex}.`);
+            return;
+        }
+        const value = parseFloat(instrParts[1]);
+        if (isNaN(value)){
+            console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
+            return;
+        }
+
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(new Vector(0, -30));
-        const value = instrParts[1];
         cells.push(new Cell(newPos, value));
         } break;
+
     case "plusi": {
-        const prevCell = cells.pop();
-        const prevPrevCell = cells.pop();
-        const newPos = prevPrevCell.pos;
-        const value = parseInt(prevPrevCell.value) + parseInt(prevCell.value);
+        if (cells.length < 2) {
+            console.error(`Stack underflow on line ${instrLineIndex}`);
+            return;
+        }
+        const currentCell = cells.pop();
+        const previousCell = cells.pop();
+        const newPos = previousCell.pos;
+        const value = parseInt(previousCell.value) + parseInt(currentCell.value);
         cells.push(new Cell(newPos, value));
         } break;
+
+    case "swap": {
+        if (null == instrParts[1]) {
+            console.error(`No offset was provided to "swap" on line ${instrLineIndex}.`);
+            return;
+        }
+        const value = parseInt(instrParts[1]);
+        if (isNaN(value)){
+            console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
+            return;
+        }
+        if (cells.length - 1 < value) {
+            console.error(`Stack underflow on line ${instrLineIndex}.`);
+            return;
+        }
+        const currentCell = cells.pop();
+        const swappingCell = cells[cells.length - value];
+        cells[cells.length - value] = currentCell;
+        cells.push(swappingCell);
+
+        const tempPos = currentCell.pos.copy();
+        currentCell.pos.setFrom(swappingCell.pos);
+        swappingCell.pos.setFrom(tempPos);
+        } break;
+
     case "call": {
+        const prevCell = cells[cells.length - 1];
+        const newPos = prevCell.pos.add(new Vector(0, -30));
+        const value = instrLineIndex;
+        cells.push(new Cell(newPos, value));
+        instrLineIndex = labels[instrParts[1]]
         } break;
     case "halt": {
         } break;
