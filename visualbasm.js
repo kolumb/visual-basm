@@ -1,5 +1,7 @@
 "use strict";
 const tabsElem = document.querySelector("#TabsElem");
+const mainTabElem = document.querySelector("#MainTabElem");
+const includeOptionElem = document.querySelector("#IncludeOptionElem");
 const inputElem = document.querySelector("#InputElem");
 const highlightingOverlayElem = document.querySelector("#HighlightingOverlay");
 const stepLineElem = document.querySelector("#StepLineElem");
@@ -34,6 +36,7 @@ resizeHandler();
 
 let rawCodeLines;
 const lineElems = [];
+let labels = {};
 
 let instrLineIndex = -1;
 let instrLine = "";
@@ -42,6 +45,17 @@ let instrType;
 const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 parseInput();
+
+let entryLabel = inputElem.value.match(/%entry\s+(\S+)/)[1];
+mainTabElem.textContent = entryLabel;
+
+includeOptionElem.innerHTML = "";
+for(let inst of inputElem.value.matchAll(/%include\s+(\S+)/g)) {
+    const option = document.createElement("option");
+    option.value = inst[1];
+    option.textContent = inst[1];
+    includeOptionElem.appendChild(option);
+}
 
 function addLineToEditor(line) {
     const lineElem = document.createElement("pre");
@@ -56,10 +70,21 @@ function parseInput() {
     lineElems.length = 0;
     highlightingOverlayElem.innerHTML = "";
     rawCodeLines.map(addLineToEditor);
+    labels = {};
+    rawCodeLines.map((line, i) => {
+        const inst = line.trim()
+        if(!inst || inst.length < 2 || inst.startsWith(";") || !inst.endsWith(":")) return;
+        labels[inst.slice(0, -1)] = i;
+    });
 }
 
 function stepEditor() {
     lineElems[instrLineIndex]?.classList.remove("current-line");
+
+    if(instrLineIndex < 0) {
+        instrLineIndex = labels[entryLabel];
+    }
+
     while (instrLineIndex < lineElems.length) {
         instrLineIndex++;
         instrLine = lineElems[instrLineIndex]?.textContent.trim()
@@ -72,13 +97,13 @@ function stepEditor() {
         inputElem.scroll({
           top: lineElems[instrLineIndex]?.offsetTop - editorHeight / 4,
           left: 0,
-          behavior: 'smooth'
+          behavior: "smooth"
         });
     } else if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop > 3 * editorHeight / 4) {
         inputElem.scroll({
           top: lineElems[instrLineIndex]?.offsetTop - 3 * editorHeight / 4,
           left: 0,
-          behavior: 'smooth'
+          behavior: "smooth"
         });
     }
 }
@@ -150,9 +175,9 @@ tabsElem.addEventListener("click", e => {
     if (e.target.nodeName !== "SELECT") {
         Array.prototype.slice.call(tabsElem.children).map(tab => {
             if(e.target === tab || e.target.parentNode === tab) {
-                tab.classList.add('selected')
+                tab.classList.add("selected");
             } else {
-                tab.classList.remove('selected')
+                tab.classList.remove("selected");
             }
         })
     }

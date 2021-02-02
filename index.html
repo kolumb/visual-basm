@@ -158,17 +158,10 @@ body {
     <main class="wrapper">
         <div id="InterpreterElem">
             <div id="TabsElem">
-                <div class="tab selected">
-                    <label for="Entry point:">Entry point:</label>
-                    <select id="EntryPointOptionElem">
-                        <option value="main">main:</option>
-                    </select>
-                </div>
+                <div id="MainTabElem" class="tab selected"></div>
                 <div class="tab">
                     <label for="Entry point:">Included sources:</label>
-                    <select id="IncludeOptionElem">
-                        <option value="natives.hasm">natives.hasm</option>
-                    </select>
+                    <select id="IncludeOptionElem"></select>
                 </div>
             </div>
             <div id="EditorElem">
@@ -521,7 +514,20 @@ dump_u64:
     push 1
     native write
 
-    ret</textarea>
+    ret
+
+%include "./examples/natives.hasm"
+
+main:
+    push 1
+    push 2
+    push 3
+    plusi
+    plusi
+    call dump_u64
+    halt
+
+%entry main</textarea>
                 <div id="HighlightingOverlay"></div>
             </div>
             <button id="StepLineElem">Step a line</button>
