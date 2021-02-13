@@ -223,6 +223,8 @@ function executeInstruction() {
         if (isNaN(value)){
             if (memoryConstants[instrParts[1]] !== undefined) {
                 value = memoryConstants[instrParts[1]];
+            } else if (instrParts[1].match(/'.'/)) {
+                value = instrParts[1].charCodeAt(1);
             } else {
                 console.error(`Invalid constant "${instrParts[1]}" on line ${instrLineIndex}"`)
                 return;
@@ -391,7 +393,7 @@ function stepLineHandler (e) {
 
 stepLineElem.addEventListener("click", stepLineHandler)
 window.addEventListener("keydown", e => {
-    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT") {
+    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT" || e.target.nodeName === "BUTTON") {
         return;
     } else {
         if (e.code === "Space") {
