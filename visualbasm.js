@@ -25,14 +25,13 @@ class Cell {
         ctx.fillStyle = "#27356b";
         ctx.fillRect(visualPos.x, visualPos.y, this.size.x, this.size.y);
         ctx.fillStyle = "white";
+        ctx.textAlign = "center";
         ctx.fillText(this.value, this.pos.x, this.pos.y + this.size.y / 4);
     }
 }
 const cells = [];
 const cell = new Cell(new Vector( width / 2, height * 7 / 8))
 cells.push(cell);
-
-resizeHandler();
 
 let rawCodeLines;
 const lineElems = [];
@@ -49,6 +48,8 @@ let entryLabel;
 const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 parseInput();
+
+resizeHandler();
 
 includeOptionElem.innerHTML = "";
 for(let inst of inputElem.value.matchAll(/%include\s+(\S+)/g)) {
@@ -272,10 +273,19 @@ function executeInstruction() {
     }
 }
 
-function frame() {
+function render() {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
     cells.map(cell => cell.draw());
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.fillText(`memory: ${memoryString}`, 10, height - 10);
+    let yPos = height - 10 - 20;
+    for (const name in memoryConstants) {
+        ctx.fillText(`${name}: ${memoryConstants[name]}`, 10, yPos);
+        yPos -= 20;
+    }
 }
 
 function resizeHandler() {
@@ -283,9 +293,8 @@ function resizeHandler() {
     height = innerHeight;
     canvas.height = height;
     canvas.width = width;
-    ctx.textAlign = "center";
     editorHeight = inputElem.offsetHeight;
-    frame();
+    render();
 };
 window.addEventListener("resize", resizeHandler);
 
@@ -336,7 +345,7 @@ function stepLineHandler (e) {
     stepEditor();
     parseInstruction();
     executeInstruction();
-    frame();
+    render();
 };
 
 stepLineElem.addEventListener("click", stepLineHandler)
