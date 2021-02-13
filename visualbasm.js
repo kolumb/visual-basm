@@ -312,6 +312,9 @@ function executeInstruction() {
         const currentCell = cells[cells.length - 1];
         const sourceCell = cells[cells.length - 1 - value];
         const newCell = new Cell(currentCell.pos.add(newCellPadding), sourceCell.value);
+        if (!descriptionInComment) {
+            newCell.description = sourceCell.description;
+        }
         cells.push(newCell);
         } break;
 
@@ -330,7 +333,7 @@ function executeInstruction() {
             console.error(`Division by zero on line ${instrLineIndex}`);
             return;
         }
-        binaryOperation((a, b) => a / b);
+        binaryOperation((a, b) => Math.floor(a / b));
         } break;
 
     case "equ": {
