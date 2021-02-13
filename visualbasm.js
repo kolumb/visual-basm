@@ -241,6 +241,7 @@ function executeInstruction() {
     case "divu":
     case "modu":
     case "modi":
+    case "minusi":
     case "plusi": {
         if (cells.length < 2) {
             console.error(`Stack underflow on line ${instrLineIndex}`);
@@ -280,6 +281,14 @@ function executeInstruction() {
         const previousCell = cells.pop();
         const newPos = previousCell.pos;
         const value = parseInt(previousCell.value) + parseInt(currentCell.value);
+        cells.push(new Cell(newPos, value));
+        } break;
+
+    case "minusi": {
+        const currentCell = cells.pop();
+        const previousCell = cells.pop();
+        const newPos = previousCell.pos;
+        const value = parseInt(previousCell.value) - parseInt(currentCell.value);
         cells.push(new Cell(newPos, value));
         } break;
 
