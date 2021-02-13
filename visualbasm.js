@@ -12,6 +12,7 @@ let width = innerWidth / 2
 let height = innerHeight;
 let editorHeight;
 const backgroundColor = "#282923";
+const newCellPadding = new Vector(0, -30);
 
 
 class Cell {
@@ -217,7 +218,7 @@ function executeInstruction() {
             }
         }
         const prevCell = cells[cells.length - 1];
-        const newPos = prevCell.pos.add(new Vector(0, -30));
+        const newPos = prevCell.pos.add(newCellPadding);
         cells.push(new Cell(newPos, value));
         } break;
 
@@ -273,13 +274,13 @@ function executeInstruction() {
         }
         const currentCell = cells[cells.length - 1];
         const sourceCell = cells[cells.length - value];
-        const newCell = new Cell(sourceCell.pos.add(new Vector(0, -30), sourceCell.value));
+        const newCell = new Cell(sourceCell.pos.add(newCellPadding, sourceCell.value));
         cells.push(newCell);
         } break;
 
     case "call": {
         const prevCell = cells[cells.length - 1];
-        const newPos = prevCell.pos.add(new Vector(0, -30));
+        const newPos = prevCell.pos.add(newCellPadding);
         const value = instrLineIndex + 1;
         cells.push(new Cell(newPos, value));
         jumpToIndex = labels[instrParts[1]];
