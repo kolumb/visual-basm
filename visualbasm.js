@@ -225,6 +225,8 @@ function executeInstruction() {
     } break;
 
     case "write8":
+    case "divi":
+    case "divu":
     case "modu":
     case "modi":
     case "plusi": {
@@ -312,12 +314,21 @@ function executeInstruction() {
         binaryOperation((a, b) => a % b);
         } break;
 
+    case "divu":
+    case "divi": {
+        if (cells[cells.length - 1].value == 0) {
+            console.error(`Division by zero on line ${instrLineIndex}`);
+            return;
+        }
+        binaryOperation((a, b) => a / b);
+        } break;
+
     case "write8": {
         const currentCell = cells.pop();
         const previousCell = cells.pop();
-        const newPos = previousCell.pos;
-        const value = parseInt(previousCell.value) + parseInt(currentCell.value);
-        cells.push(new Cell(newPos, value));
+        const char = String.fromCharCode(parseInt(currentCell.value));
+        const memoryIndex = parseInt(previousCell.value);
+        memoryString = memoryString.substring(0, memoryIndex) + char + memoryString.substring(memoryIndex + 1);
         } break;
 
     case "call": {
