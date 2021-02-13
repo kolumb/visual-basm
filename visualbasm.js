@@ -39,6 +39,7 @@ const lineElems = [];
 let labels = {};
 
 let instrLineIndex = -1;
+let jumpToIndex = -1;
 let instrLine = "";
 let instrParts = [];
 let instrType;
@@ -46,8 +47,12 @@ const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 parseInput();
 
-let entryLabel = inputElem.value.match(/%entry\s+(\S+)/)[1];
-mainTabElem.textContent = entryLabel;
+let entryLabel = inputElem.value.match(/[^;]\s*%entry\s+(\S+)/)?.[1];
+if (entryLabel) {
+    mainTabElem.textContent = entryLabel;
+} else {
+    mainTabElem.textContent = "No entry label";
+}
 
 includeOptionElem.innerHTML = "";
 for(let inst of inputElem.value.matchAll(/%include\s+(\S+)/g)) {
@@ -73,25 +78,39 @@ function parseInput() {
     labels = {};
     rawCodeLines.map((line, i) => {
         const inst = line.trim()
-        if(!inst || inst.length < 2 || inst.startsWith(";") || !inst.endsWith(":")) return;
-        labels[inst.slice(0, -1)] = i;
+        if (!inst || inst.length < 2 || inst.startsWith(";") || !inst.endsWith(":")) return;
+
+        const label = inst.slice(0, -1);
+        if (labels[label] !== undefined) {
+            console.error(`Label "${label}" on line ${i} was alredy defined on line ${labels[label]}`);
+            return;
+        }
+        labels[label] = i; // labels are guarenteed to never be redefined
     });
 }
 
 function stepEditor() {
     lineElems[instrLineIndex]?.classList.remove("current-line");
 
-    if(instrLineIndex < 0) {
-        instrLineIndex = labels[entryLabel];
+    if (instrLineIndex < 0 && entryLabel) {
+        jumpToIndex = labels[entryLabel];
+        instrType = LINE_TYPE.LABEL;
     }
 
-    while (instrLineIndex < lineElems.length) {
-        instrLineIndex++;
-        instrLine = lineElems[instrLineIndex]?.textContent.trim()
-        if (instrLine && !instrLine.startsWith(";")) {
-            break;
+    instrLine = "";
+    if (jumpToIndex < 0) { // Previous instr wasn't jump
+        while (instrLineIndex < lineElems.length) {
+            instrLineIndex++;
+            instrLine = lineElems[instrLineIndex]?.textContent.trim()
+            if (instrLine && !instrLine.startsWith(";")) {
+                break;
+            }
         }
-    } // side effects: instrLineIndex
+    } else { // Need to jump
+        instrLineIndex = jumpToIndex;
+        jumpToIndex = -1;
+        instrLine = lineElems[instrLineIndex]?.textContent.trim()
+    }
     lineElems[instrLineIndex]?.classList.add("current-line");
     if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop < editorHeight / 4) {
         inputElem.scroll({
@@ -187,9 +206,11 @@ function executeInstruction() {
     case "call": {
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(new Vector(0, -30));
-        const value = instrLineIndex;
+        const value = instrLineIndex + 1;
         cells.push(new Cell(newPos, value));
-        instrLineIndex = labels[instrParts[1]]
+        jumpToIndex = labels[instrParts[1]];
+        instrType = LINE_TYPE.LABEL;
+        console.log(`Will jump to ${jumpToIndex}`)
         } break;
     case "halt": {
         } break;
