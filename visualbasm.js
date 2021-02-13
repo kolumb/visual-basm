@@ -37,22 +37,17 @@ resizeHandler();
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
+let staticMemory = {};
 
 let instrLineIndex = -1;
 let jumpToIndex = -1;
 let instrLine = "";
 let instrParts = [];
 let instrType;
+let entryLabel;
 const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 parseInput();
-
-let entryLabel = inputElem.value.match(/[^;]\s*%entry\s+(\S+)/)?.[1];
-if (entryLabel) {
-    mainTabElem.textContent = entryLabel;
-} else {
-    mainTabElem.textContent = "No entry label";
-}
 
 includeOptionElem.innerHTML = "";
 for(let inst of inputElem.value.matchAll(/%include\s+(\S+)/g)) {
@@ -78,14 +73,54 @@ function parseInput() {
     labels = {};
     rawCodeLines.map((line, i) => {
         const inst = line.trim()
-        if (!inst || inst.length < 2 || inst.startsWith(";") || !inst.endsWith(":")) return;
+        if (!inst || inst.length < 2 || inst.startsWith(";")) return;
+        if (inst.startsWith("%")) {
+            const directiveParts = inst.split(/\s+/);
+            switch (directiveParts[0].slice(1)) {
+            case "const": {
+                if (!directiveParts[1] || !directiveParts[2]) {
+                    console.error(`Not enought argument for const directive "${inst}" on line ${i}`);
+                    return;
+                }
+                const string = directiveParts[2].match(/"(.*)"/)?.[1];
+                staticMemory[directiveParts[1]] = string ? string : parseFloat(directiveParts[2]);
+                } break;
+            case "native": {
 
-        const label = inst.slice(0, -1);
-        if (labels[label] !== undefined) {
-            console.error(`Label "${label}" on line ${i} was alredy defined on line ${labels[label]}`);
-            return;
+                } break;
+            case "include": {
+
+                } break;
+            case "entry": {
+                if (entryLabel) {
+                    console.error(`Redefenition of entry label "${entryLabel}" on line "${i}"`)
+                    return;
+                }
+                if (!directiveParts[1]) {
+                    console.error(`Not enought argument for entry directive "${inst}" on line ${i}`);
+                    return;
+                }
+                entryLabel = directiveParts[1];
+                mainTabElem.textContent = entryLabel;
+                } break;
+            case "include": {
+
+                } break;
+            default: {
+                console.error(`Unknown pre-processor directive "${inst}" on line ${i}`);
+                }
+            }
+            if (!entryLabel) {
+                mainTabElem.textContent = "No entry label";
+            }
+        } else if (inst.endsWith(":")) {
+            const label = inst.slice(0, -1);
+            if (labels[label] !== undefined) {
+                console.error(`Label "${label}" on line ${i} was alredy defined on line ${labels[label]}`);
+                return;
+            }
+            labels[label] = i;
         }
-        labels[label] = i; // labels are guarenteed to never be redefined
     });
 }
 
