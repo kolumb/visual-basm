@@ -197,6 +197,17 @@ function parseInstruction() {
         instrType = LINE_TYPE.INSTRUCTION;
     }
 }
+function binaryOperation(f) {
+    if (cells.length < 2) {
+        console.error(`Stack underflow on line ${instrLineIndex}`);
+        return;
+    }
+    const currentCell = cells.pop();
+    const previousCell = cells.pop();
+    const newPos = previousCell.pos;
+    const value = f(parseFloat(previousCell.value), parseFloat(currentCell.value));
+    cells.push(new Cell(newPos, value));
+}
 function executeInstruction() {
     if (instrType !== LINE_TYPE.INSTRUCTION) {
         console.log(`Skipping "${instrLine}"`);
@@ -276,6 +287,15 @@ function executeInstruction() {
         const sourceCell = cells[cells.length - value];
         const newCell = new Cell(sourceCell.pos.add(newCellPadding, sourceCell.value));
         cells.push(newCell);
+        } break;
+
+    case "modu":
+    case "modi": {
+        if (cells[cells.length - 1].value == 0) {
+            console.error(`Division by zero on line ${instrLineIndex}`);
+            return;
+        }
+        binaryOperation((a, b) => a % b);
         } break;
 
     case "call": {
