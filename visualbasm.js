@@ -300,8 +300,8 @@ function executeInstruction() {
             return;
         }
         const currentCell = cells[cells.length - 1];
-        const sourceCell = cells[cells.length - value];
-        const newCell = new Cell(sourceCell.pos.add(newCellPadding, sourceCell.value));
+        const sourceCell = cells[cells.length - 1 - value];
+        const newCell = new Cell(currentCell.pos.add(newCellPadding), sourceCell.value);
         cells.push(newCell);
         } break;
 
