@@ -12,6 +12,8 @@ let width = innerWidth / 2
 let height = innerHeight;
 let editorHeight;
 const backgroundColor = "#282923";
+const memoryFontColor = "white";
+const memoryHighlightColor = "yellow";
 const newCellPadding = new Vector(0, -30);
 let fontSize = 16;
 let memoryLineHight = fontSize * 1.5;
@@ -40,14 +42,16 @@ class Cell {
 }
 let descriptionInComment = "";
 const cells = [];
-const cell = new Cell(new Vector( width / 2, height * 7 / 8))
+const cell = new Cell(new Vector( width / 3, height * 7 / 8))
 cells.push(cell);
 
+let executedInstCount = 0;
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
 let memoryString = "";
 let memoryConstants = {};
+let memoryChanged = false;
 
 let instrLineIndex = -1;
 let jumpToIndex = -1;
@@ -224,6 +228,7 @@ function executeInstruction() {
     if (instrType !== LINE_TYPE.INSTRUCTION) {
         return;
     }
+    executedInstCount++;
     switch (instrParts[0]) {
     case "call":
     case "jmp_if":
@@ -366,6 +371,7 @@ function executeInstruction() {
         const char = String.fromCharCode(parseInt(currentCell.value));
         const memoryIndex = parseInt(previousCell.value);
         memoryString = memoryString.substring(0, memoryIndex) + char + memoryString.substring(memoryIndex + 1);
+        memoryChanged = true;
         } break;
 
     case "jmp_if": {
@@ -404,14 +410,17 @@ function render() {
     ctx.fillRect(0, 0, width, height);
     cells.map(cell => cell.draw());
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = memoryChanged ? memoryHighlightColor : memoryFontColor;
+    memoryChanged = false;
     ctx.textAlign = "left";
     ctx.fillText(`memory: ${memoryString}`, memoryPadding, height - memoryPadding);
+    ctx.fillStyle = memoryFontColor;
     let yPos = height - memoryPadding - memoryLineHight;
     for (const name in memoryConstants) {
         ctx.fillText(`${name}: ${memoryConstants[name]}`, memoryPadding, yPos);
         yPos -= memoryLineHight;
     }
+    ctx.fillText(`Instructions count: ${executedInstCount}`, memoryPadding, memoryPadding);
 }
 
 function resizeHandler() {
