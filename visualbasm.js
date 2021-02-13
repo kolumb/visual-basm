@@ -19,7 +19,8 @@ class Cell {
     constructor(pos, value = 0) {
         this.pos = pos;
         this.size = new Vector(50, 15);
-        this.value = value
+        this.value = value;
+        this.description = descriptionInComment;
     }
     draw() {
         const visualPos = this.pos.sub(this.size.scale(0.5));
@@ -28,8 +29,12 @@ class Cell {
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.fillText(this.value, this.pos.x, this.pos.y + this.size.y / 4);
+        ctx.fillStyle = "grey";
+        ctx.textAlign = "left";
+        ctx.fillText(this.description, visualPos.x + this.size.x + 10, this.pos.y + this.size.y / 4);
     }
 }
+let descriptionInComment = "";
 const cells = [];
 const cell = new Cell(new Vector( width / 2, height * 7 / 8))
 cells.push(cell);
@@ -188,7 +193,10 @@ function parseInstruction() {
         }
         return;
     }
-    instrParts = instrLine.split(/\s+/);
+    const lineParts = instrLine.split(";");
+    descriptionInComment = lineParts.slice(1).join(";").trim();
+
+    instrParts = lineParts[0].trim().split(/\s+/);
     if (instrParts[0].startsWith("%")) {
         instrType = LINE_TYPE.PRE_PROCESSOR;
     } else if (instrParts[0].endsWith(":")) {
