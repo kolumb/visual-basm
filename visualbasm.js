@@ -13,12 +13,16 @@ let height = innerHeight;
 let editorHeight;
 const backgroundColor = "#282923";
 const newCellPadding = new Vector(0, -30);
+let fontSize = 16;
+let memoryLineHight = fontSize * 1.5;
+let memoryPadding = 16;
+
 
 
 class Cell {
     constructor(pos, value = 0) {
         this.pos = pos;
-        this.size = new Vector(50, 15);
+        this.size = new Vector(memoryLineHight * 4, memoryLineHight);
         this.value = value;
         this.description = descriptionInComment;
     }
@@ -393,11 +397,11 @@ function render() {
 
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
-    ctx.fillText(`memory: ${memoryString}`, 10, height - 10);
-    let yPos = height - 10 - 20;
+    ctx.fillText(`memory: ${memoryString}`, memoryPadding, height - memoryPadding);
+    let yPos = height - memoryPadding - memoryLineHight;
     for (const name in memoryConstants) {
-        ctx.fillText(`${name}: ${memoryConstants[name]}`, 10, yPos);
-        yPos -= 20;
+        ctx.fillText(`${name}: ${memoryConstants[name]}`, memoryPadding, yPos);
+        yPos -= memoryLineHight;
     }
 }
 
@@ -406,6 +410,7 @@ function resizeHandler() {
     height = innerHeight;
     canvas.height = height;
     canvas.width = width;
+    ctx.font = `${fontSize}px "Lucida Console", monospace`;
     editorHeight = inputElem.offsetHeight;
     render();
 };
