@@ -226,7 +226,7 @@ function executeInstruction() {
             } else if (instrParts[1].match(/'.'/)) {
                 value = instrParts[1].charCodeAt(1);
             } else {
-                console.error(`Invalid constant "${instrParts[1]}" on line ${instrLineIndex}"`)
+                console.error(`Can't push "${instrParts[1]}" on line ${instrLineIndex}"`)
                 return;
             }
         }
@@ -400,4 +400,10 @@ window.addEventListener("keydown", e => {
             stepLineHandler();
         }
     }
+});
+window.addEventListener("blur", e => {
+    stepLineElem.classList.add('unfocused');
+});
+window.addEventListener("focus", e => {
+    stepLineElem.classList.remove('unfocused');
 });
