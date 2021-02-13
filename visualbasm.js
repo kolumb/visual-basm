@@ -236,6 +236,8 @@ function executeInstruction() {
         }
     } break;
 
+    case "not":
+    case "equ":
     case "halt": {
     } break;
     default:
@@ -321,6 +323,17 @@ function executeInstruction() {
             return;
         }
         binaryOperation((a, b) => a / b);
+        } break;
+
+    case "equ": {
+        binaryOperation((a, b) => a == b ? 1 : 0);
+        } break;
+
+    case "not": {
+        const currentCell = cells.pop();
+        const newPos = currentCell.pos;
+        const value = parseFloat(currentCell.value) === 0 ? 1 : 0;
+        cells.push(new Cell(newPos, value));
         } break;
 
     case "write8": {
