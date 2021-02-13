@@ -214,11 +214,35 @@ function executeInstruction() {
         return;
     }
     switch (instrParts[0]) {
+    case "call":
+    case "dup":
+    case "swap":
     case "push": {
-        if (null == instrParts[1]) {
-            console.error(`No value was provided to "push" on line ${instrLineIndex}.`);
+        if (instrParts.length < 1) {
+            console.error(`No value was provided to "${instrParts[0]}" on line ${instrLineIndex}.`);
             return;
         }
+    } break;
+
+    case "write8":
+    case "modu":
+    case "modi":
+    case "plusi": {
+        if (cells.length < 2) {
+            console.error(`Stack underflow on line ${instrLineIndex}`);
+            return;
+        }
+    } break;
+
+    case "halt": {
+    } break;
+    default:
+        console.error(`Invalid instruction ${instrParts[0]} in "${instrLine}" on line ${instrLineIndex}.`);
+        return;
+    }
+
+    switch (instrParts[0]) {
+    case "push": {
         let value = parseFloat(instrParts[1]);
         if (isNaN(value)){
             if (memoryConstants[instrParts[1]] !== undefined) {
@@ -236,10 +260,6 @@ function executeInstruction() {
         } break;
 
     case "plusi": {
-        if (cells.length < 2) {
-            console.error(`Stack underflow on line ${instrLineIndex}`);
-            return;
-        }
         const currentCell = cells.pop();
         const previousCell = cells.pop();
         const newPos = previousCell.pos;
@@ -248,10 +268,6 @@ function executeInstruction() {
         } break;
 
     case "swap": {
-        if (null == instrParts[1]) {
-            console.error(`No offset was provided to "swap" on line ${instrLineIndex}.`);
-            return;
-        }
         const value = parseInt(instrParts[1]);
         if (isNaN(value)){
             console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
@@ -272,10 +288,6 @@ function executeInstruction() {
         } break;
 
     case "dup": {
-        if (null == instrParts[1]) {
-            console.error(`No offset was provided to "dup" on line ${instrLineIndex}.`);
-            return;
-        }
         const value = parseInt(instrParts[1]);
         if (isNaN(value)){
             console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
@@ -300,7 +312,18 @@ function executeInstruction() {
         binaryOperation((a, b) => a % b);
         } break;
 
+    case "write8": {
+        const currentCell = cells.pop();
+        const previousCell = cells.pop();
+        const newPos = previousCell.pos;
+        const value = parseInt(previousCell.value) + parseInt(currentCell.value);
+        cells.push(new Cell(newPos, value));
+        } break;
+
     case "call": {
+        if (null == labels[instrParts[1]]) {
+            console.error(`Invalid subroutine name on line "${instrLineIndex}"`);
+        }
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(newCellPadding);
         const value = instrLineIndex + 1;
@@ -312,7 +335,7 @@ function executeInstruction() {
     case "halt": {
         } break;
     default:
-        console.error(`Invalid instruction ${instrParts[0]} in "${instrLine}" on line ${instrLineIndex}.`);
+        console.error("Unreachable.");
     }
 }
 
