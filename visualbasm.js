@@ -37,7 +37,8 @@ resizeHandler();
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
-let staticMemory = {};
+let memory = "";
+let memoryIndices = {};
 
 let instrLineIndex = -1;
 let jumpToIndex = -1;
@@ -79,11 +80,25 @@ function parseInput() {
             switch (directiveParts[0].slice(1)) {
             case "const": {
                 if (!directiveParts[1] || !directiveParts[2]) {
-                    console.error(`Not enought argument for const directive "${inst}" on line ${i}`);
+                    console.error(`Not enought argument for const directive "${inst}" on line ${i}.`);
                     return;
                 }
                 const string = directiveParts[2].match(/"(.*)"/)?.[1];
-                staticMemory[directiveParts[1]] = string ? string : parseFloat(directiveParts[2]);
+                if (string !== undefined) {
+                    if (string.length === 0) {
+                        console.error(`Provided empty string on line ${i}.`);
+                        return;
+                    }
+                    memoryIndices[directiveParts[1]] = memory.length;
+                    memory += string;
+                } else {
+                    const number = parseFloat(directiveParts[2]);
+                    if (isNaN(number)) {
+                        console.error(`Invalid expression ${directiveParts[2]} on line ${i}`)
+                    } else {
+                        memoryIndices[directiveParts[1]] = number;
+                    }
+                }
                 } break;
             case "native": {
 
