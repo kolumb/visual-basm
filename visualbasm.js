@@ -257,6 +257,26 @@ function executeInstruction() {
         swappingCell.pos.setFrom(tempPos);
         } break;
 
+    case "dup": {
+        if (null == instrParts[1]) {
+            console.error(`No offset was provided to "dup" on line ${instrLineIndex}.`);
+            return;
+        }
+        const value = parseInt(instrParts[1]);
+        if (isNaN(value)){
+            console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
+            return;
+        }
+        if (cells.length - 1 < value) {
+            console.error(`Stack underflow on line ${instrLineIndex}.`);
+            return;
+        }
+        const currentCell = cells[cells.length - 1];
+        const sourceCell = cells[cells.length - value];
+        const newCell = new Cell(sourceCell.pos.add(new Vector(0, -30), sourceCell.value));
+        cells.push(newCell);
+        } break;
+
     case "call": {
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(new Vector(0, -30));
