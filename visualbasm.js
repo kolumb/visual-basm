@@ -45,6 +45,8 @@ const cells = [];
 const cell = new Cell(new Vector( width / 3, height * 7 / 8))
 cells.push(cell);
 
+let prevExecutedInstCount = parseInt(localStorage.getItem("prevExecutedInstCount"));
+const delay = 400;
 let executedInstCount = 0;
 let rawCodeLines;
 const lineElems = [];
@@ -64,6 +66,9 @@ const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 parseInput();
 
 resizeHandler();
+if (prevExecutedInstCount) {
+    setTimeout(stepLineHandler, delay);
+}
 
 includeOptionElem.innerHTML = "";
 for(let inst of inputElem.value.matchAll(/%include\s+(\S+)/g)) {
@@ -255,7 +260,9 @@ function executeInstruction() {
     } break;
 
     case "not":
+    case "eqi":
     case "equ":
+    case "drop":
     case "halt": {
     } break;
     default:
@@ -354,6 +361,7 @@ function executeInstruction() {
         binaryOperation((a, b) => Math.floor(a / b));
         } break;
 
+    case "eqi":
     case "equ": {
         binaryOperation((a, b) => a == b ? 1 : 0);
         } break;
@@ -372,6 +380,10 @@ function executeInstruction() {
         const memoryIndex = parseInt(previousCell.value);
         memoryString = memoryString.substring(0, memoryIndex) + char + memoryString.substring(memoryIndex + 1);
         memoryChanged = true;
+        } break;
+
+    case "drop": {
+        cells.pop();
         } break;
 
     case "jmp_if": {
@@ -481,16 +493,27 @@ function stepLineHandler (e) {
     stepEditor();
     parseInstruction();
     executeInstruction();
+    if (prevExecutedInstCount) {
+        if (executedInstCount < prevExecutedInstCount) {
+            setTimeout(stepLineHandler, delay);
+        } else {
+            localStorage.setItem("prevExecutedInstCount", 0);
+            prevExecutedInstCount = 0;
+        }
+    }
     render();
 };
 
 stepLineElem.addEventListener("click", stepLineHandler)
 window.addEventListener("keydown", e => {
-    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT" || e.target.nodeName === "BUTTON") {
+    if (e.target.nodeName === "TEXTAREA" || e.target.nodeName === "INPUT") {
         return;
     } else {
-        if (e.code === "Space") {
+        if (e.code === "Space" && e.target.nodeName !== "BUTTON") {
             stepLineHandler();
+        } else if (e.code === "KeyR") {
+            localStorage.setItem("prevExecutedInstCount", executedInstCount);
+            location.reload();
         }
     }
 });
