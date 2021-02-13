@@ -210,11 +210,11 @@ function binaryOperation(f) {
 }
 function executeInstruction() {
     if (instrType !== LINE_TYPE.INSTRUCTION) {
-        console.log(`Skipping "${instrLine}"`);
         return;
     }
     switch (instrParts[0]) {
     case "call":
+    case "jmp_if":
     case "dup":
     case "swap":
     case "push": {
@@ -342,6 +342,18 @@ function executeInstruction() {
         const char = String.fromCharCode(parseInt(currentCell.value));
         const memoryIndex = parseInt(previousCell.value);
         memoryString = memoryString.substring(0, memoryIndex) + char + memoryString.substring(memoryIndex + 1);
+        } break;
+
+    case "jmp_if": {
+        if (null == labels[instrParts[1]]) {
+            console.error(`Invalid subroutine name on line "${instrLineIndex}"`);
+        }
+        const currentCell = cells.pop();
+        if (parseFloat(currentCell.value) !== 0) {
+            jumpToIndex = labels[instrParts[1]];
+            instrType = LINE_TYPE.LABEL;
+            console.log(`Will jump to ${jumpToIndex}`);
+        }
         } break;
 
     case "call": {
