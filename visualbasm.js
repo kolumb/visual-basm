@@ -37,8 +37,8 @@ resizeHandler();
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
-let memory = "";
-let memoryIndices = {};
+let memoryString = "";
+let memoryConstants = {};
 
 let instrLineIndex = -1;
 let jumpToIndex = -1;
@@ -89,14 +89,14 @@ function parseInput() {
                         console.error(`Provided empty string on line ${i}.`);
                         return;
                     }
-                    memoryIndices[directiveParts[1]] = memory.length;
-                    memory += string;
+                    memoryConstants[directiveParts[1]] = memoryString.length;
+                    memoryString += string;
                 } else {
                     const number = parseFloat(directiveParts[2]);
                     if (isNaN(number)) {
                         console.error(`Invalid expression ${directiveParts[2]} on line ${i}`)
                     } else {
-                        memoryIndices[directiveParts[1]] = number;
+                        memoryConstants[directiveParts[1]] = number;
                     }
                 }
                 } break;
@@ -206,12 +206,15 @@ function executeInstruction() {
             console.error(`No value was provided to "push" on line ${instrLineIndex}.`);
             return;
         }
-        const value = parseFloat(instrParts[1]);
+        let value = parseFloat(instrParts[1]);
         if (isNaN(value)){
-            console.error(`Invalid value "${instrParts[1]} on line ${instrLineIndex}"`)
-            return;
+            if (memoryConstants[instrParts[1]] !== undefined) {
+                value = memoryConstants[instrParts[1]];
+            } else {
+                console.error(`Invalid constant "${instrParts[1]}" on line ${instrLineIndex}"`)
+                return;
+            }
         }
-
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(new Vector(0, -30));
         cells.push(new Cell(newPos, value));
