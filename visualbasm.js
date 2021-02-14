@@ -46,8 +46,9 @@ const cell = new Cell(new Vector( width / 3, height * 7 / 8))
 cells.push(cell);
 
 let prevExecutedInstCount = parseInt(localStorage.getItem("prevExecutedInstCount"));
-const delay = 400;
+const delay = 200;
 let executedInstCount = 0;
+let lastStepEditorTime = 0;
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
@@ -182,17 +183,21 @@ function stepEditor() {
         instrLine = lineElems[instrLineIndex]?.textContent.trim()
     }
     lineElems[instrLineIndex]?.classList.add("current-line");
+    const newStepEditorTime = performance.now();
+    const dt = newStepEditorTime - lastStepEditorTime;
+    const smooth = 0 === prevExecutedInstCount && dt > delay * 2
+    lastStepEditorTime = newStepEditorTime;
     if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop < editorHeight / 4) {
         inputElem.scroll({
           top: lineElems[instrLineIndex]?.offsetTop - editorHeight / 4,
           left: 0,
-          behavior: "smooth"
+          behavior: (smooth ? "smooth" : "auto")
         });
     } else if (lineElems[instrLineIndex]?.offsetTop - inputElem.scrollTop > 3 * editorHeight / 4) {
         inputElem.scroll({
           top: lineElems[instrLineIndex]?.offsetTop - 3 * editorHeight / 4,
           left: 0,
-          behavior: "smooth"
+          behavior: (smooth ? "smooth" : "auto")
         });
     }
 }
@@ -512,8 +517,13 @@ window.addEventListener("keydown", e => {
         if (e.code === "Space" && e.target.nodeName !== "BUTTON") {
             stepLineHandler();
         } else if (e.code === "KeyR") {
-            localStorage.setItem("prevExecutedInstCount", executedInstCount);
-            location.reload();
+            if (e.shiftKey) {
+                localStorage.setItem("prevExecutedInstCount", 0);
+                prevExecutedInstCount = 0;
+            } else {
+                localStorage.setItem("prevExecutedInstCount", executedInstCount);
+                location.reload();
+            }
         }
     }
 });
