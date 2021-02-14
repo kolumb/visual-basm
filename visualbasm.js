@@ -52,6 +52,7 @@ let lastStepEditorTime = 0;
 let rawCodeLines;
 const lineElems = [];
 let labels = {};
+let natives = {};
 let memoryString = "";
 let memoryConstants = {};
 let memoryChanged = false;
@@ -122,7 +123,13 @@ function parseInput() {
                 }
                 } break;
             case "native": {
-
+                if (!directiveParts[1] || !directiveParts[2]) {
+                    console.error(`Not enought argument for native directive "${inst}" on line ${i}.`);
+                    return;
+                }
+                if ("write" === directiveParts[1]) {
+                    natives[directiveParts[1]] = console.log;
+                }
                 } break;
             case "include": {
 
@@ -133,7 +140,7 @@ function parseInput() {
                     return;
                 }
                 if (!directiveParts[1]) {
-                    console.error(`Not enought argument for entry directive "${inst}" on line ${i}`);
+                    console.error(`Provided no argument for entry directive "${inst}" on line ${i}`);
                     return;
                 }
                 entryLabel = directiveParts[1];
@@ -169,18 +176,16 @@ function stepEditor() {
     }
 
     instrLine = "";
-    if (jumpToIndex < 0) { // Previous instr wasn't jump
-        while (instrLineIndex < lineElems.length) {
-            instrLineIndex++;
-            instrLine = lineElems[instrLineIndex]?.textContent.trim()
-            if (instrLine && !instrLine.startsWith(";")) {
-                break;
-            }
-        }
-    } else { // Need to jump
+    if (jumpToIndex >= 0) {
         instrLineIndex = jumpToIndex;
         jumpToIndex = -1;
+    }
+    while (instrLineIndex < lineElems.length) {
+        instrLineIndex++;
         instrLine = lineElems[instrLineIndex]?.textContent.trim()
+        if (instrLine && !instrLine.startsWith(";")) {
+            break;
+        }
     }
     lineElems[instrLineIndex]?.classList.add("current-line");
     const newStepEditorTime = performance.now();
@@ -240,6 +245,7 @@ function executeInstruction() {
     }
     executedInstCount++;
     switch (instrParts[0]) {
+    case "native":
     case "call":
     case "jmp_if":
     case "dup":
@@ -268,6 +274,7 @@ function executeInstruction() {
     case "eqi":
     case "equ":
     case "drop":
+    case "ret":
     case "halt": {
     } break;
     default:
@@ -400,6 +407,28 @@ function executeInstruction() {
             jumpToIndex = labels[instrParts[1]];
             instrType = LINE_TYPE.LABEL;
             console.log(`Will jump to ${jumpToIndex}`);
+        }
+        } break;
+
+    case "ret": {
+        const currentCell = cells.pop();
+        jumpToIndex = parseInt(currentCell.value);
+        instrType = LINE_TYPE.LABEL;
+        console.log(`Will jump to ${jumpToIndex}`)
+        } break;
+
+    case "native": {
+        if (null == natives[instrParts[1]]) {
+            console.error(`Invalid native function "${instrParts[1]}" on line "${instrLineIndex}"`);
+        }
+        if ("write" === instrParts[1]) {
+            if (cells.length < 2) {
+                console.error(`Stack underflow on line ${instrLineIndex}`);
+                return;
+            }
+            const stringLength = parseInt(cells.pop().value);
+            const memoryPointer = parseInt(cells.pop().value);
+            natives[instrParts[1]](memoryString.substr(memoryPointer, stringLength));
         }
         } break;
 
