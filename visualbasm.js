@@ -42,7 +42,7 @@ class Cell {
 }
 let descriptionInComment = "";
 const cells = [];
-const cell = new Cell(new Vector( width / 3, height * 7 / 8))
+const cell = new Cell(new Vector( width / 3, height * 7 / 8), "Stack");
 cells.push(cell);
 
 let prevExecutedInstCount = parseInt(localStorage.getItem("prevExecutedInstCount"));
@@ -63,6 +63,7 @@ let instrLine = "";
 let instrParts = [];
 let instrType;
 let entryLabel;
+let halted = false;
 const LINE_TYPE = {PRE_PROCESSOR: 0, LABEL: 1, INSTRUCTION: 2};
 
 parseInput();
@@ -413,7 +414,6 @@ function executeInstruction() {
     case "ret": {
         const currentCell = cells.pop();
         jumpToIndex = parseInt(currentCell.value);
-        instrType = LINE_TYPE.LABEL;
         console.log(`Will jump to ${jumpToIndex}`)
         } break;
 
@@ -438,13 +438,16 @@ function executeInstruction() {
         }
         const prevCell = cells[cells.length - 1];
         const newPos = prevCell.pos.add(newCellPadding);
-        const value = instrLineIndex + 1;
+        const value = instrLineIndex;
         cells.push(new Cell(newPos, value));
         jumpToIndex = labels[instrParts[1]];
         instrType = LINE_TYPE.LABEL;
-        console.log(`Will jump to ${jumpToIndex}`)
+        console.log(`Will jump to ${jumpToIndex}.`);
         } break;
     case "halt": {
+        console.log("Program succesfully halted.");
+        halted = true;
+        stepLineElem.disabled = true;
         } break;
     default:
         console.error("Unreachable.");
@@ -459,7 +462,7 @@ function render() {
     ctx.fillStyle = memoryChanged ? memoryHighlightColor : memoryFontColor;
     memoryChanged = false;
     ctx.textAlign = "left";
-    ctx.fillText(`memory: ${memoryString}`, memoryPadding, height - memoryPadding);
+    ctx.fillText(`memory: ${memoryString.replaceAll("\n", "\\n")}`, memoryPadding, height - memoryPadding);
     ctx.fillStyle = memoryFontColor;
     let yPos = height - memoryPadding - memoryLineHight;
     for (const name in memoryConstants) {
@@ -524,6 +527,10 @@ inputElem.addEventListener("scroll", e => {
 });
 
 function stepLineHandler (e) {
+    if (halted) {
+        console.error("Program is halted");
+        return;
+    }
     stepEditor();
     parseInstruction();
     executeInstruction();
