@@ -45,7 +45,7 @@ const cells = [];
 const cell = new Cell(new Vector( width / 3, height * 7 / 8), "Stack");
 cells.push(cell);
 
-let prevExecutedInstCount = parseInt(localStorage.getItem("prevExecutedInstCount"));
+let prevExecutedInstCount = parseInt(localStorage.getItem("prevExecutedInstCount")) || 0;
 const delay = 200;
 let executedInstCount = 0;
 let lastStepEditorTime = 0;
